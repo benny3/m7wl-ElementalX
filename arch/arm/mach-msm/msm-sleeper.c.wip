@@ -1,0 +1,112 @@
+/*
+ * ElementalX msm-sleeper by flar2 <asegaert@gmail.com>
+ * Based on ideas from 
+ * Christopher R. Palmer <crpalmer@gmail.com>
+ * Paul Reioux aka Faux123 <reioux@gmail.com>
+ * 
+ *
+ * This software is licensed under the terms of the GNU General Public
+ * License version 2, as published by the Free Software Foundation, and
+ * may be copied, distributed, and modified under those terms.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ */
+
+#include <linux/earlysuspend.h>
+#include <linux/workqueue.h>
+#include <linux/cpu.h>
+#include <linux/module.h>
+#include <linux/cpufreq.h>
+
+#define MSM_SLEEPER_MAJOR_VERSION	1
+#define MSM_SLEEPER_MINOR_VERSION	1
+
+uint32_t maxscroff = 0;
+extern uint32_t maxscroff_freq;
+uint32_t old_max = 0;
+
+static int __init cpufreq_read_arg_maxscroff(char *max_so)
+{
+	unsigned long ui_khz;
+	int err;
+
+	err = strict_strtoul(max_so, 0, &ui_khz);
+	if (err) {
+	    maxscroff = 0;
+	    printk(KERN_INFO "[Maxscroff toggle]: max_so='%i'\n", maxscroff);
+	    return 1;
+	}
+
+	maxscroff = ui_khz;
+        return 1;
+}
+
+__setup("max_so=", cpufreq_read_arg_maxscroff);
+
+
+
+
+
+
+#ifdef CONFIG_HAS_EARLYSUSPEND
+static void __cpuinit msm_sleeper_early_suspend(struct early_suspend *h)
+{
+	int i;
+	int num_cores = 4;
+	struct cpufreq_policy *policy;
+
+	policy = cpufreq_cpu_get(0);
+	old_max = policy->max;
+	policy->max = maxscroff_freq;
+	printk(KERN_INFO "[msm-sleeper]: Limited freq to '%u'\n", maxscroff_freq);
+	for (i = 1; i < num_cores; i++) {
+		if (cpu_online(i))
+			cpu_down(i);
+	}
+}
+
+static void __cpuinit msm_sleeper_late_resume(struct early_suspend *h)
+{
+	int i;
+	int num_cores = 4;
+	struct cpufreq_policy *policy;
+
+	policy = cpufreq_cpu_get(0);
+	policy->max = old_max;
+	printk(KERN_INFO "[msm-sleeper]: Restoring freq to '%u'\n", old_max);
+	for (i = 1; i < num_cores; i++) {
+		if (!cpu_online(i))
+			cpu_up(i);
+	}
+}
+
+static struct early_suspend msm_sleeper_early_suspend_driver = {
+	.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN + 10,
+	.suspend = msm_sleeper_early_suspend,
+	.resume = msm_sleeper_late_resume,
+};
+#endif
+
+static int __init msm_sleeper_init(void)
+{
+	pr_info("msm-sleeper version %d.%d\n",
+		 MSM_SLEEPER_MAJOR_VERSION,
+		 MSM_SLEEPER_MINOR_VERSION);
+
+#ifdef CONFIG_HAS_EARLYSUSPEND
+	if (maxscroff == 1)
+		register_early_suspend(&msm_sleeper_early_suspend_driver);
+#endif
+	return 0;
+}
+
+MODULE_AUTHOR("flar2 <asegaert@gmail.com>");
+MODULE_DESCRIPTION("'msm-sleeper' - Limit max frequency and shut off cores while screen is off");
+MODULE_LICENSE("GPL");
+
+late_initcall(msm_sleeper_init);
+
