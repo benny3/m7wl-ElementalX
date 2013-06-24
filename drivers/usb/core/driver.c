@@ -854,7 +854,7 @@ static int usb_resume_interface(struct usb_device *udev,
 	struct usb_driver	*driver;
 	int			status = 0;
 	int log_enable = 0;
-#if defined(CONFIG_MACH_DUMMY) || defined(CONFIG_MACH_DUMMY) || defined(CONFIG_MACH_DUMMY)
+#if defined(CONFIG_MACH_DUMMY) || defined(CONFIG_MACH_M7_WLS) || defined(CONFIG_MACH_DUMMY)
 	if (!strncmp(dev_name(&udev->dev), "usb1", 4) && (get_radio_flag() & 0x1)) {
 		log_enable = 1;
 	}
@@ -1012,7 +1012,7 @@ static int usb_resume_both(struct usb_device *udev, pm_message_t msg)
 	struct usb_interface	*intf;
 	int log_enable = 0;
 
-#if defined(CONFIG_MACH_DUMMY) || defined(CONFIG_MACH_DUMMY) || defined(CONFIG_MACH_DUMMY)
+#if defined(CONFIG_MACH_DUMMY) || defined(CONFIG_MACH_M7_WLS) || defined(CONFIG_MACH_DUMMY)
 	if (!strncmp(dev_name(&udev->dev), "usb1", 4) && (get_radio_flag() & 0x1)) {
 		log_enable = 1;
 	}
@@ -1243,7 +1243,7 @@ int usb_autoresume_device(struct usb_device *udev)
 	int	status;
 	int log_enable = 0;
 
-#if defined(CONFIG_MACH_DUMMY) || defined(CONFIG_MACH_DUMMY) || defined(CONFIG_MACH_DUMMY)
+#if defined(CONFIG_MACH_DUMMY) || defined(CONFIG_MACH_M7_WLS) || defined(CONFIG_MACH_DUMMY)
 	if (get_radio_flag() & 0x1) {
 		dev_info(&udev->dev, "dev_name(udev->dev)=[%s]\n", dev_name(&udev->dev));
 		if (!strncmp(dev_name(&udev->dev), "1-1", 3)) {
@@ -1422,7 +1422,7 @@ int usb_runtime_resume(struct device *dev)
 	struct usb_device	*udev = to_usb_device(dev);
 	int			status;
 	int log_enable = 0;
-#if defined(CONFIG_MACH_DUMMY) || defined(CONFIG_MACH_DUMMY) || defined(CONFIG_MACH_DUMMY)
+#if defined(CONFIG_MACH_DUMMY) || defined(CONFIG_MACH_M7_WLS) || defined(CONFIG_MACH_DUMMY)
 	if (!strncmp(dev_name(dev), "usb1", 4) && (get_radio_flag() & 0x1)) {
 		log_enable = 1;
 	}

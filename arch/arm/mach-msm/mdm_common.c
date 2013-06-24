@@ -554,7 +554,7 @@ static void mdm_disable_irqs(void)
 
 static irqreturn_t mdm_errfatal(int irq, void *dev_id)
 {
-#if defined(CONFIG_MACH_DUMMY) || defined(CONFIG_MACH_DUMMY) || defined(CONFIG_MACH_DUMMY)
+#if defined(CONFIG_MACH_DUMMY) || defined(CONFIG_MACH_M7_WLS) || defined(CONFIG_MACH_DUMMY)
 	extern struct device *msm_hsic_host_dev;
 	if ( msm_hsic_host_dev != NULL) {
 		pr_err("%s: p_dbg_msm_hsic_host:(0x%x)fp:[%d][%d][%d]\n", __func__,

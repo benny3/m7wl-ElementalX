@@ -2331,7 +2331,7 @@ int usb_remote_wakeup(struct usb_device *udev)
 	int log_enable = 0;
 	struct usb_hcd *hcd = bus_to_hcd(udev->bus);
 
-#if defined(CONFIG_MACH_DUMMY) || defined(CONFIG_MACH_DUMMY) || defined(CONFIG_MACH_DUMMY)
+#if defined(CONFIG_MACH_DUMMY) || defined(CONFIG_MACH_M7_WLS) || defined(CONFIG_MACH_DUMMY)
 	if (!strncmp(dev_name(&udev->dev), "usb1", 4) && (get_radio_flag() & 0x1)) {
 		log_enable = 1;
 	}
