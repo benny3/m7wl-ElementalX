@@ -129,7 +129,6 @@ extern bool ap_cfg_running;
 extern bool ap_fw_loaded;
 #endif
 bool wifi_fail_retry = false;
-extern void pet_watchdog(void);
 
 #define AOE_IP_ALIAS_SUPPORT 1
 
@@ -2738,10 +2737,6 @@ dhd_dpc_thread(void *data)
 {
 	tsk_ctl_t *tsk = (tsk_ctl_t *)data;
 	dhd_info_t *dhd = (dhd_info_t *)tsk->parent;
-	
-	
-	unsigned long start_time = 0;
-	
 
 	
 	
@@ -2793,18 +2788,8 @@ dhd_dpc_thread(void *data)
 			
 			if (dhd->pub.busstate != DHD_BUS_DOWN) {
 				dhd_os_wd_timer_extend(&dhd->pub, TRUE);
-				
-				start_time = jiffies;
-				
 				while (dhd_bus_dpc(dhd->pub.bus)) {
 					
-					
-					if (time_after(jiffies, start_time + 3*HZ) && rt_class(dhd_dpc_prio)) {
-						DHD_ERROR(("dhd_bus_dpc is busy in real time priority, kick dog!\n"));
-						pet_watchdog();
-						start_time = jiffies;
-						
-					}
 				}
 				dhd_os_wd_timer_extend(&dhd->pub, FALSE);
 				DHD_OS_WAKE_UNLOCK(&dhd->pub);
